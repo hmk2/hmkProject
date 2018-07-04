@@ -1,0 +1,123 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.sys.dao.EmployeeDao">
+	<select	id="queryEmployeePage" resultType="Map">
+			SELECT ey.*, job.jobName,dept.deptName 
+			FROM
+				employee ey INNER JOIN em_de_job edj
+			ON 	ey.employeeId=edj.employeeId
+			INNER JOIN de_job dj
+			ON edj.deptId=dj.deptId AND edj.jobId=dj.jobId
+			INNER JOIN dept ON  dj.deptId=dept.deptId
+			INNER JOIN job ON dj.jobId=job.jobId
+			ORDER BY ey.employeeId ASC
+			limit #{page},#{rows}
+	</select>
+	<select id="findEmployeeById" parameterType="int" resultType="Employee">
+		select
+			employeeid,employeename,employeepwd,
+			employeeincome,employeephone,employeemail,
+			employeeremark,employeestatus
+		from
+			employee
+		where
+			employeeId=#{id} 
+	</select>
+	<select	id="queryAllEmployee" resultType="int">
+		select
+			count(*) 
+		from
+			employee
+	</select>
+	<select	id="queryAllEmployeeId" resultType="int">
+		select
+			employeeid
+		from
+			employee
+	</select>
+	<select	id="findEmployeeByName" resultType="Employee">
+		select
+			employeeid,employeename,employeepwd,
+			employeeincome,employeephone,employeemail,
+			employeeremark,employeestatus
+		from
+			employee
+		where
+			employeename=#{name} 
+	</select>
+	<select	id="queryAllEmployeePhone" resultType="long">
+		select
+			 employeephone
+		from
+			employee
+	</select>
+	<select	id="queryAllEmployeeName" resultType="String">
+		select
+			distinct employeename
+		from
+			employee
+	</select>
+	<insert id="addEmployee" parameterType="Employee">
+		insert into employee
+			(employeename,employeepwd,employeeincome,employeephone,employeemail,employeeremark)
+		values
+			(#{employeeName},#{employeePwd},#{employeeIncome},#{employeePhone},
+			#{employeeMail},#{employeeRemark})
+	</insert>
+	<update id="updateEmployee" parameterType="Employee">
+		update employee
+		set 
+			employeename=#{employeeName},employeepwd=#{employeePwd},employeeincome=#{employeeIncome},
+			employeephone=#{employeePhone},employeemail=#{employeeMail},employeeRemark=#{employeeRemark},employeeStatus=#{employeeStatus}
+		where
+			employeeid=#{employeeId}
+	</update>
+	<update id="deleteEmployee" parameterType="int">
+		update employee
+		set
+			employeeStatus=2
+		where
+			employeeid=#{employeeId}
+	</update>
+	<select id="searchEmployee" parameterType="Map" resultType="map">
+		SELECT ey.*, job.jobName,dept.deptName 
+			FROM
+				employee ey INNER JOIN em_de_job edj
+			ON 	ey.employeeId=edj.employeeId
+			INNER JOIN de_job dj
+			ON edj.deptId=dj.deptId AND edj.jobId=dj.jobId
+			INNER JOIN dept ON  dj.deptId=dept.deptId
+			INNER JOIN job ON dj.jobId=job.jobId	
+		where 1=1
+		<if test="employee.employeeId!=0">
+    	and ey.employeeId=#{employee.employeeId} 
+   		</if>
+   		<if test="employee.employeePhone!=0">
+    	and ey.employeePhone=#{employee.employeePhone} 
+   		</if>
+   		<if test="employee.employeeName!=null and !&quot;&quot;.equals(employee.employeeName.trim())">
+    	and ey.employeeName=#{employee.employeeName} 
+   		</if>
+   		ORDER BY ey.employeeId ASC	
+   		limit #{page.page},#{page.rows}
+	</select>
+		<select	id="querysearchEmployeeacount" resultType="int" parameterType="Employee">
+		select
+			count(*) 
+		from
+			employee
+		where
+			1=1
+		<if test="employeeId!=0">
+    	and employeeId=#{employeeId} 
+   		</if>
+   		<if test="employeePhone!=0">
+    	and employeePhone=#{employeePhone} 
+   		</if>
+   		<if test="employeeName!=null and !&quot;&quot;.equals(employeeName.trim())">
+    	and employeeName=#{employeeName} 
+   		</if>	
+	</select>
+</mapper>

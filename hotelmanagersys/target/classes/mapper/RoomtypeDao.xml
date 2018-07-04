@@ -1,0 +1,95 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.RoomtypeDao">
+	 <select id="queryRoomtypePage" resultType="Roomtype">
+		select
+			roomTypeId,roomTypeName,roomTypeRemark,roomTypeStatus
+		from
+			roomtype
+		limit #{page},#{rows}
+	</select>
+	<select id="findRoomtypeById" parameterType="int" resultType="Roomtype">
+		select
+			roomTypeId,roomTypeName,roomTypeRemark,roomTypeStatus
+		from
+			roomtype
+		where
+			roomTypeId=#{id} 
+	</select>
+	<select id="findRoomtypeByName" parameterType="String" resultType="Roomtype">
+		select
+			roomTypeId,roomTypeName,roomTypeRemark,roomTypeStatus
+		from
+			roomtype
+		where
+			roomTypeName=#{name} 
+	</select>
+	<insert id="addRoomtype" parameterType="Roomtype">
+		insert into roomtype
+			(roomTypeName,roomTypeRemark)
+		values
+			(#{roomTypeName},#{roomTypeRemark})
+	</insert>
+	<select	id="queryAllRoomtype" resultType="int">
+		select
+			count(*) 
+		from
+			roomtype
+	</select>
+	<select	id="queryAllRoomtypeId" resultType="int">
+		select
+			roomTypeId
+		from
+			roomtype
+	</select>
+	<select	id="queryAllRoomtypeName" resultType="String">
+		select
+			distinct roomTypeName
+		from
+			roomtype
+	</select>
+	<update id="updateRoomtype" parameterType="Roomtype">
+		update roomtype
+		set 
+			roomTypeName=#{roomTypeName},roomTypeRemark=#{roomTypeRemark},
+			roomTypeStatus=#{roomTypeStatus}
+		where
+			roomTypeId=#{roomTypeId}
+	</update>
+	<update id="deleteRoomtype" parameterType="int">
+		update roomtype
+		set
+			roomTypeStatus=2
+		where
+			roomTypeId=#{id}
+	</update>
+	<select id="searchNews" parameterType="Map" resultType="Roomtype">
+		select
+			roomTypeId,roomTypeName,roomTypeRemark,roomTypeStatus
+		from
+			roomtype
+		where 1=1
+		<if test="roomtype.roomTypeId!=0">
+    	and roomTypeId=#{roomtype.roomTypeId} 
+   		</if>
+   		<if test="roomtype.roomTypeName!=null and !&quot;&quot;.equals(roomtype.roomTypeName.trim())">
+    	and roomTypeName=#{roomtype.roomTypeName} 
+   		</if>	
+   		limit #{page.page},#{page.rows}	
+	</select>
+		<select	id="querysearchRoomTypecount" resultType="int" parameterType="Roomtype">
+		select
+			count(*) 
+		from
+			roomtype
+		where
+			1=1
+		<if test="roomTypeId!=0">
+    	and roomTypeId=#{roomTypeId} 
+   		</if>
+   		<if test="roomTypeName!=null and !&quot;&quot;.equals(roomTypeName.trim())">
+    	and roomTypeName=#{roomTypeName} 
+   		</if>	
+	</select>
+</mapper>

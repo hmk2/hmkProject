@@ -1,0 +1,25 @@
+
+<form id="job-form-Edit" method="post" style="padding:10px;">
+     <table>
+     	<tr>
+             <td width="100" align="right">职位ID:</td>
+             <td><input readonly="readonly" id="jobId" type="text" name="jobId"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">职位:</td>
+             <td><input id="jobName" type="text" name="jobName"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">所属部门:</td>
+             <td><input id="jobdeptName" class="easyui-combobox" data-options="url:'serachdeptName'" name="deptName"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">状态:</td>
+             <td><input id="jobStatus" type="text" name="jobStatus"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">职位备注:</td>
+             <td><textarea id="jobRemark" name="jobRemark" rows="3"  style="width:150px">字数20字以内</textarea></td>
+         </tr>
+  	</table>
+</form>

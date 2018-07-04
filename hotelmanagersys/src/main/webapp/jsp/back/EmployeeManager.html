@@ -1,0 +1,263 @@
+<div style="margin-bottom:5px" id="Employeetb">
+	<div >
+		<a href="#" class="easyui-linkbutton" onclick="addEmployee()" iconCls="icon-add" plain="true">添加员工信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="editEmployee()" iconCls="icon-edit" plain="true">编辑员工信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="deleteEmployee()" iconCls="icon-remove" plain="true">删除员工信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="" iconCls="icon-save" plain="true">数据导出</a>
+	</div>
+	<div >
+		<span>员工ID:</span>
+		<select id="itemEmployeeid"  class="easyui-combobox"  style="width: 80px" >
+		</select>
+		<span>员工姓名:</span>
+		<select id="itemEmployeeName"  class="easyui-combobox"  style="width: 80px" >
+		</select>
+		<span>员工电话:</span>
+		<select id="itemEmployeePhone" class="easyui-combobox"   style="width: 115px" >
+		</select>
+		<a href="#" iconCls="icon-search" class="easyui-linkbutton" plain="true" onclick="doEmployeeSearch()">Search</a>
+	</div>
+</div>
+<table id="Employee" toolbar="#Employeetb" fit="true" title="员工信息管理"></table>
+<script type="text/javascript">
+	$.post('serachEmployeeId',function(result){ 
+		$("#itemEmployeeid").combobox('loadData', result);
+		 $("#itemEmployeeid").combobox('setValue', '--请选择--'); 
+		$("#itemEmployeeid").combobox({panelHeight:120});
+	},'json');
+		
+	$.post('serachEmployeeName',function(result){ 
+		$("#itemEmployeeName").combobox('loadData', result);
+		 $("#itemEmployeeName").combobox('setValue', '--请选择--'); 
+		$("#itemEmployeeName").combobox({panelHeight:120});
+	},'json');
+		
+	$.post('serachEmployeePhone',function(result){ 
+		$("#itemEmployeePhone").combobox('loadData', result);
+		 $("#itemEmployeePhone").combobox('setValue', '------请选择------'); 
+		$("#itemEmployeePhone").combobox({panelHeight:120});
+	},'json');
+	
+$('#Employee').datagrid({
+		url:'queryEmployee',
+		rownumbers:true,  
+		pagination:true,
+		striped:true,
+		singleSelect:true,
+		/* fitColumns:true, */
+		pageSize:10, 
+		selectOnCheck:false,
+		fit:true,
+		columns:[[ 
+    	{ checkbox:true},   
+        {field:'employeeId',title:'员工ID',width:50},    
+        {field:'employeeName',title:'员工姓名/账户',width:100},
+        {field:'employeePwd',title:'员工密码',width:150}, 
+        {field:'employeeIncome',title:'员工收入',width:100}, 
+         {field:'employeePhone',title:'员工电话',width:150}, 
+        {field:'employeeMail',title:'员工邮箱',width:200} ,
+        {field:'employeeRemark',title:'员工备注',width:100},
+        {field:'jobName',title:'所属职位',width:100},
+        {field:'deptName',title:'所属部门',width:100},
+        {field:'employeeStatus',title:'员工状态',width:50} ]]	
+	});
+	
+	function doEmployeeSearch(){
+	var id=$('#itemEmployeeid').combo('getValue');
+	var name=$('#itemEmployeeName').combo('getValue');
+	var phone=$('#itemEmployeePhone').combo('getValue');
+		$('#Employee').datagrid({
+				url:'searchEmployee',
+				queryParams:{
+					id:id,
+					name:name,
+					phone:phone
+				}	
+		});	
+	}
+	function deleteEmployee()
+	{
+		var row = $('#Employee').datagrid('getChecked');
+		if (row[0]){
+			$.messager.confirm('Confirm','Are you sure you want to remove this Employee?',function(r){
+				if (r){
+					$.post('deleteEmployee',{employeeId:row[0].employeeId},function(result){
+						if (result.status=="success"){
+						$.messager.show({
+							   title:'提示',
+							   msg:'部门信息删除成功'
+						});
+							$('#Employee').datagrid('reload');	// reload the user data
+						} else {
+							$.messager.show({	// show error message
+								title: 'Error',
+								msg: result.msg
+							});
+						}
+					},'json');
+				}
+			});
+		}
+		else
+		{
+			$.messager.alert('提示', '请勾选一条要删除的数据','info');	
+		}
+	}
+	
+	var addemployee;
+	function addEmployee(){
+	 addemployee = $('<div>').dialog({
+				//closed: false,   //改为true  默认就是看不到窗口
+				modal:true,        //对话框的底层是不可以进行操作的。	
+				href:'jsp/back/employeeAdd.html',				
+				title: "添加信息",
+				width: 280,
+				top:100,
+				buttons: [{
+					text: '确定',
+					iconCls: 'icon-ok',  
+					 handler: addSaveEmployee 
+				}, {
+					text: '取消',
+					iconCls: 'icon-cancel',
+					handler: function () {
+						addemployee.dialog('close');                    
+					}
+				}]
+		});
+	}
+	function addSaveEmployee(){
+		var employeeName=$('#employeeName').val();
+		var employeePwd=$('#employeePwd').val();
+		var employeeIncome=$('#employeeIncome').val();
+		var employeePhone=$('#employeePhone').val();
+		var employeeMail=$('#employeeMail').val();
+		var jobName=$('#jobName').combo('getText');
+		var deptName=$('#deptName').combo('getText');
+		var employeeRemark=$('#employeeRemark').val();
+		$.ajax({
+				url:'addsaveEmployee',
+				type:"post",
+				dataType:"json",
+				data:{
+					employeeName:employeeName,
+					employeePwd:employeePwd,
+					employeeIncome:employeeIncome,
+					employeePhone:employeePhone,
+					employeeMail:employeeMail,
+					jobName:jobName,
+					deptName:deptName,
+					employeeRemark:employeeRemark,
+				},
+				success:function(data){
+				 	if(data.status=="success"){
+						addemployee.dialog('close');  
+						$.messager.show({
+							title : '提示',
+							msg : '更新成功'
+						});
+						$('#Employee').datagrid({
+								url:'queryEmployee',
+							});
+					}else{
+						$.messager.show({
+							title : '提示',
+							msg : '更新失败，请联系管理员 ------'
+						});
+					}
+				},
+				error:function(){
+						$.messager.show({
+							title : '提示',
+							msg : '系统错误'
+						});
+				}
+			});
+	}
+	var employeeEdit;
+	var deptName;
+	var jobName;
+	var employeeId;
+	function editEmployee(){
+	var rows = $('#Employee').datagrid('getChecked');
+	if(rows.length == 1){
+		 employeeEdit = $('<div>').dialog({
+			href:'jsp/back/EmployeeEdit.html',
+			closed: false,
+			width: 380,
+			top:170,
+			modal:true,
+
+			title: "修改用户",
+			buttons: [{
+				text: '确定',
+				iconCls: 'icon-ok',
+				handler: editsaveEmployee
+			}, {
+				text: '取消',
+				iconCls: 'icon-cancel',
+				handler: function () {
+					employeeEdit.dialog('close');                    
+				}
+			}],
+			onClose : function() {
+					$(this).dialog('destroy');
+			},
+			onLoad : function() {
+				$('#employee-form-Edit').form('load',{
+					employeeId:rows[0].employeeId,
+					employeeName: rows[0].employeeName,
+					employeePwd:rows[0].employeePwd,
+					employeeIncome: rows[0].employeeIncome,
+					employeeMail:rows[0].employeeMail,
+					employeeStatus:rows[0].employeeStatus,
+					deptName:rows[0].deptName,
+					employeePhone:rows[0].employeePhone,
+					jobName:rows[0].jobName,
+					employeeRemark:rows[0].employeeRemark,
+				});
+				
+				jobName=rows[0].jobName
+ 				deptsname=rows[0].deptName;
+ 				employeeId=rows[0].employeeId;
+			}
+		});
+	}else{
+		$.messager.alert('提示', '请勾选一条要编辑的数据','info');	
+	}
+}
+function editsaveEmployee(){
+	 		$.ajax({
+				url:'deleteemdejob',
+				type:"post",
+				dataType:"json",
+				data:{
+					jobName:jobName,
+	 				deptsname:deptsname,
+	 				employeeId:employeeId
+				},
+			}); 
+ 		$('#employee-form-Edit').form('submit',{
+			url: 'editSaveEmployee',
+			 onSubmit: function(){
+				return $(this).form('validate');
+			}, 
+			success: function(result){
+				var result = eval('('+result+')'); 
+				if (result.status=="success"){
+					employeeEdit.dialog("close");
+					$.messager.show({
+							   title:'提示',
+							   msg:'部门信息修改成功'
+						});	
+					$('#Employee').datagrid('reload');
+				} else {
+					$.messager.show({
+						title: 'Error',
+						msg: result.msg
+					});
+				}
+			}
+		}); 
+	}	
+</script>

@@ -1,0 +1,212 @@
+<div style="margin-bottom:5px" id="roomTypetb">
+	<div >
+		<a href="#" class="easyui-linkbutton" onclick="addRoomType()" iconCls="icon-add" plain="true">添加房间类型</a>
+		<a href="#" class="easyui-linkbutton" onclick="editRoomType()" iconCls="icon-edit" plain="true">编辑房间类型</a>
+		<a href="#" class="easyui-linkbutton" onclick="" iconCls="icon-save" plain="true">保存房间类型</a>
+		<a href="#" class="easyui-linkbutton" onclick="deleteRoomType()" iconCls="icon-remove" plain="true">删除房间类型</a>
+	</div>
+	<div >
+		<span>房间类型ID:</span>
+		<select id="itemRoomTypeid"  style="width: 80px" >
+		</select>
+		<span>房间类型姓名:</span>
+		<select id="itemRoomTypeName"  style="width: 80px" >
+		</select>
+		<a href="#" iconCls="icon-search" class="easyui-linkbutton" plain="true" onclick="doRoomTypeSearch()">Search</a>
+	</div>
+</div>
+<table id="RoomType"  toolbar="#roomTypetb" title="房间类型管理"></table>
+<script type="text/javascript">
+	$.post('serachRoomTypeid',function(result){ 
+			 for(var i=0;i<result.length;i++)
+			{
+				 $("#itemRoomTypeid").append("<option>"+result[i]+"</option>"); 
+				
+			} 
+			$("#itemRoomTypeid").combobox({panelHeight:120});
+					},'json');
+
+	$.post('serachRoomTypeName',function(result){ 
+			 for(var i=0;i<result.length;i++)
+			{
+				$("#itemRoomTypeName").append("<option>"+result[i]+"</option>");
+			} 
+			$("#itemRoomTypeName").combobox({panelHeight:120});
+					},'json');
+	$('#RoomType').datagrid({
+		url:"queryRoomtype", 
+		rownumbers:true,  
+		pagination:true,	   
+		striped:true,		  	  
+		singleSelect:true, 
+		pageSize:10, 
+		selectOnCheck:false,
+		fit:true,
+		columns:[[ 
+    	{ checkbox:true},   
+        {field:'roomTypeId',title:'房间类型ID',width:200},    
+        {field:'roomTypeName',title:'房间类型名字',width:200},
+        {field:'roomTypeRemark',title:'房间类型备注',width:600},    
+        {field:'roomTypeStatus',title:'房间类型状态',width:100}  ]]	
+	});
+	var addroomtype;
+	function addRoomType(){
+	 addroomtype = $('<div>').dialog({
+				//closed: false,   //改为true  默认就是看不到窗口
+				modal:true,        //对话框的底层是不可以进行操作的。	
+				href:'jsp/back/roomTypeAdd.html',				
+				title: "添加信息",
+				width: 320,
+				top:170,
+				buttons: [{
+					text: '确定',
+					iconCls: 'icon-ok',
+					handler: addSaveRoomType
+				}, {
+					text: '取消',
+					iconCls: 'icon-cancel',
+					handler: function () {
+						addroomtype.dialog('close');                    
+					}
+				}]
+		});
+	}
+	function addSaveRoomType(){
+		var roomTypeName=$('#roomTypeName').val();
+		var roomTypeRemark=$('#roomTypeRemark').val();
+		$.ajax({
+				url:'addsaveroomtpe',
+				type:"post",
+				dataType:"json",
+				data:{
+					roomTypeName:roomTypeName,
+					roomTypeRemark:roomTypeRemark,
+				},
+				success:function(data){
+				 	if(data.status=="success"){
+						addroomtype.dialog('close');  
+						$.messager.show({
+							title : '提示',
+							msg : '更新成功'
+						});
+						$('#RoomType').datagrid({
+							url:'queryRoomtype',
+						});	
+					}else{
+						$.messager.show({
+							title : '提示',
+							msg : '更新失败，请联系管理员 ------'
+						});
+					}
+				},
+				error:function(){
+						$.messager.show({
+							title : '提示',
+							msg : '系统错误'
+						});
+				}
+			});
+	}
+	var roomTypeEdit;
+	function editRoomType(){
+	var rows = $('#RoomType').datagrid('getChecked');
+	if(rows.length == 1){
+		 roomTypeEdit = $('<div>').dialog({
+			href:'jsp/back/roomTypeEdit.html',
+			closed: false,
+			width: 400,
+			top:170,
+			modal:true,
+
+			title: "修改用户",
+			buttons: [{
+				text: '确定',
+				iconCls: 'icon-ok',
+				handler: editsaveRoomType
+			}, {
+				text: '取消',
+				iconCls: 'icon-cancel',
+				handler: function () {
+					roomTypeEdit.dialog('close');                    
+				}
+			}],
+			onClose : function() {
+					$(this).dialog('destroy');
+			},
+			onLoad : function() {
+				$('#roomType-form-Edit').form('load',{
+					roomTypeId:rows[0].roomTypeId,
+					roomTypeName: rows[0].roomTypeName,
+					roomTypeStatus:rows[0].roomTypeStatus,
+					roomTypeRemark : rows[0].roomTypeRemark
+				});
+			}
+		});
+	}else{
+		$.messager.alert('提示', '请勾选一条要编辑的数据','info');	
+	}
+}
+function editsaveRoomType(){
+		$('#roomType-form-Edit').form('submit',{
+			url: 'editSaveRoomType',
+			onSubmit: function(){
+				return $(this).form('validate');
+			},
+			success: function(result){
+				var result = eval('('+result+')'); 
+				if (result.status=="success"){
+					roomTypeEdit.dialog("close");
+					$.messager.show({
+							   title:'提示',
+							   msg:'部门信息修改成功'
+						});	
+					$('#RoomType').datagrid('reload');
+				} else {
+					$.messager.show({
+						title: 'Error',
+						msg: result.msg
+					});
+				}
+			}
+		});
+	}	
+	function deleteRoomType()
+	{
+		var row = $('#RoomType').datagrid('getChecked');
+		if (row[0]){
+			$.messager.confirm('Confirm','Are you sure you want to remove this RoomType?',function(r){
+				if (r){
+					$.post('deleteRoomType',{roomTypeid:row[0].roomTypeId},function(result){
+						if (result.status=="success"){
+						$.messager.show({
+							   title:'提示',
+							   msg:'部门信息删除成功'
+						});
+							$('#RoomType').datagrid('reload');	// reload the user data
+						} else {
+							$.messager.show({	// show error message
+								title: 'Error',
+								msg: result.msg
+							});
+						}
+					},'json');
+				}
+			});
+		}
+		else
+		{
+			$.messager.alert('提示', '请勾选一条要删除的数据','info');	
+		}
+	}
+	function doRoomTypeSearch(){
+		var id=$('#itemRoomTypeid').combo('getText');
+		var name=$('#itemRoomTypeName').combo('getText');
+			$('#RoomType').datagrid({
+					url:'searchRoomType',
+					queryParams:{
+						id:id,
+ 						name:name
+					}	
+			});	
+	}	
+</script>

@@ -1,0 +1,24 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.DeJobDao">
+	<insert id="addDj" parameterType="int">
+		insert into de_job
+			(deptId,jobId)
+		values
+			(#{deptId},#{jobId})
+	</insert>
+	<delete id="deleteDj" parameterType="int">
+		delete from de_job
+		where
+			deptId=#{deptId} and jobId=#{jobId} 
+	</delete>
+	<select	id="findDeJonb" resultType="int">
+		select
+			count(*) 
+		from
+			de_job
+		where
+			deptId=#{deptId} and jobId=#{jobId} 
+	</select>
+</mapper>

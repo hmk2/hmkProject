@@ -1,0 +1,44 @@
+<form id="employee-form-Edit" method="post" style="padding:10px;">
+     <table>
+     	<tr>
+             <td width="100" align="right">员工ID:</td>
+             <td><input readonly="readonly" id="employeeId" type="text" name="employeeId"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">员工姓名:</td>
+             <td><input readonly="readonly" id="employeeName" type="text" name="employeeName"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">密&nbsp;&nbsp;&nbsp;&nbsp;码:</td>
+             <td><input id="employeePwd" type="text" name="employeePwd"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">收&nbsp;&nbsp;&nbsp;&nbsp;入:</td>
+             <td><input id="employeeIncome" type="text" name="employeeIncome"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">电 &nbsp;&nbsp;&nbsp;&nbsp;话:</td>
+             <td><input id="employeePhone" type="text" name="employeePhone"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">邮 &nbsp;&nbsp;&nbsp;&nbsp;箱:</td>
+             <td><input id="employeeMail" type="text" name="employeeMail"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">状 &nbsp;&nbsp;&nbsp;&nbsp;态:</td>
+             <td><input id="employeeStatus" type="text" name="employeeStatus"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">所属职位:</td>
+            <td><input id="jobName" class="easyui-combobox" data-options="url:'serachjobName'" name="jobName"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">所属部门:</td>
+             <td><input id="deptName" class="easyui-combobox" data-options="url:'serachdeptName'" name="deptName"/></td>
+         </tr>
+         <tr>
+             <td width="100" align="right">员工备注:</td>
+             <td><textarea id="employeeRemark" name="employeeRemark" rows="3"  style="width:150px">字数20字以内</textarea></td>
+         </tr>
+  	</table>
+</form>

@@ -1,0 +1,96 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.sys.dao.RoomDao">
+	<select id="findRoomById" parameterType="int" resultType="Room">
+		select
+			roomId,roomPrice,roomRemark,roomStatus,image
+		from
+			room
+		where
+			roomId=#{id} 
+	</select>
+	<select id="searchRoom" parameterType="Map" resultType="Map">
+		SELECT 
+			rm.*,ry.roomTypeName 
+		FROM
+			room rm
+		INNER JOIN rooms rs ON rm.roomId=rs.roomId
+		INNER JOIN roomtype ry ON rs.roomTypeId=ry.roomTypeId
+		where 1=1
+		<if test="room.roomId!=0">
+    	and rm.roomId=#{room.roomId} 
+   		</if>
+   		<if test="room.roomPrice!=0">
+    	and rm.roomPrice=#{room.roomPrice} 
+   		</if>
+   		<if test="room.roomStatus!=0">
+    	and rm.roomStatus=#{room.roomStatus} 
+   		</if>	
+   		limit #{page.page},#{page.rows}
+	</select>
+	<select	id="querysearchRoomcount" resultType="int" parameterType="Room">
+		select
+			count(*) 
+		from
+			room
+		where
+			1=1
+		<if test="roomId!=0">
+    	and roomId=#{roomId} 
+   		</if>
+   		<if test="roomPrice!=0">
+    	and roomPrice=#{roomPrice} 
+   		</if>
+   		<if test="roomStatus!=0">
+    	and roomStatus=#{roomStatus} 
+   		</if>	
+   		
+	</select>
+	<select	id="queryRoompage" resultType="Map">
+		SELECT 
+			room.*,ry.roomTypeName 
+		FROM
+			room 
+		INNER JOIN rooms rs ON room.roomId=rs.roomId
+		INNER JOIN roomtype ry ON rs.roomTypeId=ry.roomTypeId
+		ORDER BY room.roomId ASC
+		limit #{page},#{rows}
+	</select>
+	<select	id="queryallRoom" resultType="int">
+		select
+			count(*) 
+		from
+			room
+	</select>
+	<select	id="queryallRoomId" resultType="int">
+		select
+			roomId
+		from
+			room
+	</select>
+	<select	id="queryallRoomPrice" resultType="int">
+		select
+			distinct roomPrice
+		from
+			room
+	</select>
+	<insert id="addRoom" parameterType="Room">
+		insert into room(roomId,roomPrice,roomRemark)values(#{roomId},#{roomPrice},#{roomRemark},#{image})
+	</insert>
+	<update id="updateRoom" parameterType="Room">
+		update room
+		set 
+			roomPrice=#{roomPrice},roomRemark=#{roomRemark},roomStatus=#{roomStatus},image=#{image}
+		where
+			roomId=#{roomId}
+	</update>
+	<update id="deleteRoom" parameterType="int">
+		update room
+		set
+			roomStatus=2
+		where
+			roomId=#{id}
+	</update>
+</mapper>

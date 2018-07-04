@@ -1,0 +1,98 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.JobDao"> 
+	<select	id="queryJobPage" resultType="Map">
+		SELECT jb.* ,dp.deptName FROM
+		job jb INNER JOIN de_job dj
+		ON jb.jobId=dj.jobId
+		INNER JOIN dept dp
+		ON dj.deptId=dp.deptId
+		ORDER BY jb.jobId ASC
+		limit #{page},#{rows}
+	</select>
+	<select id="findJobById" parameterType="int" resultType="Job">
+		select
+			jobId,jobName,jobRemark,jobStatus
+		from
+			job
+		where
+			jobId=#{id} 
+	</select>
+	<select id="findJobByname" parameterType="String" resultType="Job">
+		select
+			jobId,jobName,jobRemark,jobStatus
+		from
+			job
+		where
+			jobName=#{name} 
+	</select>
+	<insert id="addJob" parameterType="Job">
+		insert into job
+			(jobName,jobRemark)
+		values
+			(#{jobName},#{jobRemark})
+	</insert>
+	<select	id="queryAllJob" resultType="int">
+		select
+			count(*) 
+		from
+			job
+	</select>
+	<select	id="queryAllJobId" resultType="int">
+		select
+			jobId
+		from
+			job
+	</select>
+	<select	id="queryAllJobName" resultType="String">
+		select
+			distinct jobName
+		from
+			job
+	</select>
+	<update id="updateJob" parameterType="Job">
+		update job
+		set 
+			jobName=#{jobName},jobRemark=#{jobRemark},jobStatus=#{jobStatus}
+		where
+			jobId=#{jobId}
+	</update>
+	<update id="deleteJob" parameterType="int">
+		update job
+		set
+			jobStatus=2
+		where
+			jobId=#{jobId}
+	</update>
+	<select id="searchJob" parameterType="Map" resultType="Map">
+		SELECT jb.* ,dp.deptName,dp.deptRemark FROM
+		job jb INNER JOIN de_job dj
+		ON jb.jobId=dj.jobId
+		INNER JOIN dept dp
+		ON dj.deptId=dp.deptId
+		where 1=1
+		<if test="job.jobId!=0">
+    	and jb.jobId=#{job.jobId} 
+   		</if>
+   		<if test="job.jobName!=null and !&quot;&quot;.equals(job.jobName.trim())">
+    	and jb.jobName=#{job.jobName} 
+   		</if>	
+   		ORDER BY jb.jobId ASC
+   		limit #{page.page},#{page.rows}
+	</select>
+	<select	id="querysearchJobcount" resultType="int" parameterType="Job">
+		select
+			count(*) 
+		from
+			job
+		where
+			1=1
+		<if test="deptId!=0">
+    	and jobId=#{jobId} 
+   		</if>
+   		<if test="jobName!=null and !&quot;&quot;.equals(jobName.trim())">
+    	and jobName=#{jobName} 
+   		</if>	
+	</select>
+</mapper>

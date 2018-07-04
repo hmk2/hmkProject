@@ -1,0 +1,25 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.RoomsDao">
+	<insert id="addrooms" parameterType="int">
+		insert into rooms
+			(roomId,roomTypeId)
+		values
+			(#{roomId},#{roomTypeId})
+	</insert>
+	<delete id="deleterooms" parameterType="int">
+		delete from rooms
+		where
+			roomId=#{roomId} and roomTypeId=#{roomTypeId} 
+	</delete>
+	<select	id="findrooms" resultType="int">
+		select
+			count(*) 
+		from
+			rooms
+		where
+			roomId=#{roomId} and roomTypeId=#{roomTypeId} 
+	</select>
+</mapper>
+

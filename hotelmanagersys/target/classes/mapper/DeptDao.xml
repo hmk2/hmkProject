@@ -1,0 +1,94 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.DeptDao">
+	<select	id="queryDeptPage" resultType="Dept">
+		select
+			deptId,deptName,deptRemark,deptStatus
+		from
+			dept
+		limit #{page},#{rows}
+	</select>
+	<select id="findDeptById" parameterType="int" resultType="Dept">
+		select
+			deptId,deptName,deptRemark,deptStatus
+		from
+			dept
+		where
+			deptId=#{id} 
+	</select>
+	<select id="findDeptByname" parameterType="String" resultType="Dept">
+		select
+			deptId,deptName,deptRemark,deptStatus
+		from
+			dept
+		where
+			deptName=#{name} 
+	</select>
+	<insert id="addDept" parameterType="Dept">
+		insert into dept
+			(deptName,deptRemark)
+		values
+			(#{deptName},#{deptRemark})
+	</insert>
+	<select	id="queryAllDept" resultType="int">
+		select
+			count(*) 
+		from
+			dept
+	</select>
+	<select	id="queryAllDeptId" resultType="int">
+		select
+			deptId
+		from
+			dept
+	</select>
+	<select	id="queryAllDeptName" resultType="String">
+		select
+			distinct deptName
+		from
+			dept
+	</select>
+	<update id="updateDept" parameterType="Dept">
+		update dept
+		set 
+			deptName=#{deptName},deptRemark=#{deptRemark},deptStatus=#{deptStatus}
+		where
+			deptId=#{deptId}
+	</update>
+	<update id="deleteDept" parameterType="int">
+		update dept
+		set
+			deptStatus=2
+		where
+			deptId=#{id}
+	</update>
+	<select id="searchDept" parameterType="Map" resultType="Dept">
+		select
+			deptId,deptName,deptRemark,deptStatus
+		from
+			dept
+		where 1=1
+		<if test="dept.deptId!=0">
+    	and deptId=#{dept.deptId} 
+   		</if>
+   		<if test="dept.deptName!=null and !&quot;&quot;.equals(dept.deptName.trim())">
+    	and deptName=#{dept.deptName} 
+   		</if>
+   		limit #{page.page},#{page.rows}
+	</select>
+	<select	id="querysearchDeptcount" resultType="int" parameterType="Dept">
+		select
+			count(*) 
+		from
+			dept
+		where
+			1=1
+		<if test="deptId!=0">
+    	and deptId=#{deptId} 
+   		</if>
+   		<if test="deptName!=null and !&quot;&quot;.equals(deptName.trim())">
+    	and deptName=#{deptName} 
+   		</if>	
+	</select>
+</mapper>

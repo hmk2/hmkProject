@@ -1,0 +1,225 @@
+<div style="margin-bottom:5px" id="Jobtb">
+	<div >
+		<a href="#" class="easyui-linkbutton" onclick="addJob()" iconCls="icon-add" plain="true">添加职位信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="editJob()" iconCls="icon-edit" plain="true">编辑职位信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="" iconCls="icon-save" plain="true">保存职位信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="deleteJob()" iconCls="icon-remove" plain="true">删除职位信息</a>
+	</div>
+	<div >
+		<span>职位ID:</span>
+		<select id="itemjobid" class="easyui-combobox"  style="width: 80px" >
+		</select>
+		<span>职位昵称:</span>
+		<select id="itemjobName" class="easyui-combobox"   style="width: 80px" >		
+		</select>
+		<a href="#" iconCls="icon-search" class="easyui-linkbutton" plain="true" onclick="doJobSearch()">Search</a>
+	</div>
+</div>
+<table id="Job" toolbar="#Jobtb" fit="true" title="部门管理"></table>
+<script type="text/javascript">
+	$.post('serachjobid',function(result){ 
+		$("#itemjobid").combobox('loadData', result);
+		 $("#itemjobid").combobox('setValue', '--请选择--'); 
+		$("#itemjobid").combobox({panelHeight:120});
+		},'json');
+	$.post('serachjobName',function(result){ 
+		$("#itemjobName").combobox('loadData', result);
+		 $("#itemjobName").combobox('setValue', '--请选择--'); 
+		$("#itemjobName").combobox({panelHeight:120});
+		},'json');
+	$('#Job').datagrid({
+		url:'queryJob',
+		rownumbers:true,  
+		pagination:true,
+		striped:true,
+		singleSelect:true,
+		fitColumns:true,
+		pageSize:10, 
+		selectOnCheck:false,
+		fit:true,
+		columns:[[ 
+    	{ checkbox:true},   
+        {field:'jobId',title:'职位ID',width:200},    
+        {field:'jobName',title:'职位昵称',width:200},
+        {field:'jobRemark',title:'职位备注',width:200}, 
+        {field:'deptName',title:'所属部门',width:200}, 
+        {field:'jobStatus',title:'职位状态',width:200}  ]]	
+	});
+	var addjob;
+	function addJob(){
+	 addjob = $('<div>').dialog({
+				//closed: false,   //改为true  默认就是看不到窗口
+				modal:true,        //对话框的底层是不可以进行操作的。	
+				href:'jsp/back/jobAdd.html',				
+				title: "添加信息",
+				width: 280,
+				top:170,
+				buttons: [{
+					text: '确定',
+					iconCls: 'icon-ok',  
+					 handler: addSavejob 
+				}, {
+					text: '取消',
+					iconCls: 'icon-cancel',
+					handler: function () {
+						addjob.dialog('close');                    
+					}
+				}]
+		});
+	}
+	function addSavejob(){
+		var jobName=$('#jobName').val();
+		var deptName=$('#jobdeptName').combo('getText');
+		var jobRemark=$('#jobRemark').val();
+		$.ajax({
+				url:'addsaveJob',
+				type:"post",
+				dataType:"json",
+				data:{
+					jobName:jobName,
+					deptName:deptName,
+					jobRemark:jobRemark,
+				},
+				success:function(data){
+				 	if(data.status=="success"){
+						addjob.dialog('close');  
+						$.messager.show({
+							title : '提示',
+							msg : '更新成功'
+						});
+						$('#Job').datagrid({
+								url:'queryJob',
+							});
+					}else{
+						$.messager.show({
+							title : '提示',
+							msg : '更新失败，请联系管理员 ------'
+						});
+					}
+				},
+				error:function(){
+						$.messager.show({
+							title : '提示',
+							msg : '系统错误'
+						});
+				}
+			});
+	}
+	var jobEdit;
+	var deptsid;
+	var jobid;
+	function editJob(){
+	var rows = $('#Job').datagrid('getChecked');
+	if(rows.length == 1){
+		 jobEdit = $('<div>').dialog({
+			href:'jsp/back/jobEdit.html',
+			closed: false,
+			width: 380,
+			top:170,
+			modal:true,
+
+			title: "修改用户",
+			buttons: [{
+				text: '确定',
+				iconCls: 'icon-ok',
+				handler: editsaveJob
+			}, {
+				text: '取消',
+				iconCls: 'icon-cancel',
+				handler: function () {
+					jobEdit.dialog('close');                    
+				}
+			}],
+			onClose : function() {
+					$(this).dialog('destroy');
+			},
+			onLoad : function() {
+				$('#job-form-Edit').form('load',{
+					jobId:rows[0].jobId,
+					jobName: rows[0].jobName,
+					jobStatus:rows[0].jobStatus,
+					jobRemark : rows[0].jobRemark,
+					deptName:rows[0].deptName
+				});
+ 				deptsname=rows[0].deptName;
+ 				jobid=rows[0].jobId;
+			}
+		});
+	}else{
+		$.messager.alert('提示', '请勾选一条要编辑的数据','info');	
+	}
+}
+function editsaveJob(){
+	 		$.ajax({
+				url:'deletedejob',
+				type:"post",
+				dataType:"json",
+				data:{
+					deptName:deptsname,
+					jobId:jobid
+				},
+			}); 
+ 		$('#job-form-Edit').form('submit',{
+			
+			url: 'editSaveJob',
+			 onSubmit: function(){
+				return $(this).form('validate');
+			}, 
+			success: function(result){
+				var result = eval('('+result+')'); 
+				if (result.status=="success"){
+					jobEdit.dialog("close");
+					$.messager.show({
+							   title:'提示',
+							   msg:'部门信息修改成功'
+						});	
+					$('#Job').datagrid('reload');
+				} else {
+					$.messager.show({
+						title: 'Error',
+						msg: result.msg
+					});
+				}
+			}
+		}); 
+	}	
+	function deleteJob()
+	{
+		var row = $('#Job').datagrid('getChecked');
+		if (row[0]){
+			$.messager.confirm('Confirm','Are you sure you want to remove this job?',function(r){
+				if (r){
+					$.post('deleteJob',{jobId:row[0].jobId},function(result){
+						if (result.status=="success"){
+						$.messager.show({
+							   title:'提示',
+							   msg:'部门信息删除成功'
+						});
+							$('#Job').datagrid('reload');	// reload the user data
+						} else {
+							$.messager.show({	// show error message
+								title: 'Error',
+								msg: result.msg
+							});
+						}
+					},'json');
+				}
+			});
+		}
+		else
+		{
+			$.messager.alert('提示', '请勾选一条要删除的数据','info');	
+		}
+	}
+	function doJobSearch(){
+		var id=$('#itemjobid').combo('getValue');
+		var name=$('#itemjobName').combo('getValue');
+			$('#Job').datagrid({
+					url:'searchJob',
+					queryParams:{
+						id:id,
+ 						name:name
+					}	
+			});	
+	}	
+</script>

@@ -1,0 +1,88 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.NewsDao">
+	<select	id="queryNewsPage" resultType="News">
+		select
+			newsId,newsAuthor,newsTime,newsContent,newsRemark,newsStatus
+		from
+			news
+		limit #{page},#{rows}
+	</select>
+	<select id="findNewsById" parameterType="int" resultType="News">
+		select
+			newsId,newsAuthor,newsTime,newsContent,newsRemark,newsStatus
+		from
+			news
+		where
+			newsId=#{id} 
+	</select>
+	<insert id="addNews" parameterType="News">
+		insert into news
+			(newsAuthor,newsContent,newsRemark)
+		values
+			(#{newsAuthor},#{newsContent},#{newsRemark})
+	</insert>
+	<select	id="queryAllNews" resultType="int">
+		select
+			count(*) 
+		from
+			news
+	</select>
+	<select	id="queryAllNewsId" resultType="int">
+		select
+			newsId
+		from
+			news
+	</select>
+	<select	id="queryAllNewsAuthor" resultType="String">
+		select
+			distinct newsAuthor
+		from
+			news
+	</select>
+	<update id="updateNews" parameterType="News">
+		update news
+		set 
+			newsAuthor=#{newsAuthor},newsTime=str_to_date(#{newsTime}, '%Y-%m-%d %T'),
+			newsContent=#{newsContent},newsRemark=#{newsRemark},newsStatus=#{newsStatus}
+		where
+			newsId=#{newsId}
+	</update>
+	<update id="deleteNews" parameterType="int">
+		update news
+		set
+			newsStatus=2
+		where
+			newsId=#{id}
+	</update>
+	<select id="searchNews" parameterType="Map" resultType="News">
+		select
+			newsId,newsAuthor,newsTime,newsContent,newsRemark,newsStatus
+		from
+			news
+		where 1=1
+		<if test="news.newsId!=0">
+    	and newsId=#{news.newsId} 
+   		</if>
+   		<if test="news.newsAuthor!=null and !&quot;&quot;.equals(news.newsAuthor.trim())">
+    	and newsAuthor=#{news.newsAuthor} 
+   		</if>
+   		limit #{page.page},#{page.rows}	
+	</select>
+		<select	id="querysearchNewscount" resultType="int" parameterType="News">
+		select
+			count(*) 
+		from
+			news
+		where
+			1=1
+		<if test="newsId!=0">
+    	and newsId=#{newsId} 
+   		</if>
+   		<if test="newsAuthor!=null and !&quot;&quot;.equals(newsAuthor.trim())">
+    	and newsAuthor=#{newsAuthor} 
+   		</if>	
+	</select>
+</mapper>
+

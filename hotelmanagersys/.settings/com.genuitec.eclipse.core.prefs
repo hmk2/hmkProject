@@ -1,0 +1,4 @@
+#Sun May 06 19:53:30 CST 2018
+eclipse.preferences.version=1
+validator.Checked=src/main/resources/spring/spring-web.xml
+validator.Unchecked=

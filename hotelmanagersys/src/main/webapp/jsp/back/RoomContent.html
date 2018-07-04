@@ -1,0 +1,307 @@
+<div style="margin-bottom:5px" id="roomtb">
+	<div >
+		<a href="#" class="easyui-linkbutton" onclick="addroom()" iconCls="icon-add" plain="true">添加房间信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="editroom()" iconCls="icon-edit" plain="true">编辑房间信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="" iconCls="icon-save" plain="true">保存房间信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="deleteroom()" iconCls="icon-remove" plain="true">删除房间信息</a>
+	</div>
+	<div >
+		<span>房间ID:</span>
+		<select id="itemid"  style="width: 80px" >
+		</select>
+		<span>房间价格:</span>
+		<select id="itemprice"  style="width: 80px" >
+		</select>
+		<span>房间状态:</span>
+		<select id="itemstatus"  style="width: 80px">
+			<option>1</option>
+			<option>2</option>
+		</select>
+		<a href="#" iconCls="icon-search" class="easyui-linkbutton" plain="true" onclick="doSearch()">Search</a>
+	</div>
+</div>
+<div id="imgs">
+	<img id="simg">
+</div>
+<table id="dg" data-options="fit:true" toolbar="#roomtb" title="房间信息管理"></table>
+<script type="text/javascript">
+	$.post('serachroomid',function(result){ 
+			 for(var i=0;i<result.length;i++)
+			{
+				 $("#itemid").append("<option>"+result[i]+"</option>"); 
+				
+			} 
+			$("#itemid").combobox({panelHeight:120});
+					},'json');
+
+	$.post('serachroomprice',function(result){ 
+			 for(var i=0;i<result.length;i++)
+			{
+				$("#itemprice").append("<option>"+result[i]+"</option>");
+			} 
+			$("#itemprice").combobox({panelHeight:120});
+					},'json');
+	$(function(){
+		$("#itemstatus").combobox({panelHeight:120});
+	})
+$('#dg').datagrid({   
+    url:'queryRoom', 
+	rownumbers:true,  //设置为 true，则显示带有行号的列。
+	pagination:true,	   //在数据网格（datagrid）底部显示分页工具栏。
+	striped:true,		   //即奇偶行使用不同背景色
+	fitColumns:true,	   //列自适应
+	singleSelect:true, 	   //单选行
+	pageSize:10, 
+	selectOnCheck:false,
+
+	fit:true,   
+    columns:[[ 
+    	{ checkbox:true},   
+        {field:'roomId',title:'房间ID',width:200},    
+        {field:'roomPrice',title:'房间价格（元/日）',width:200},
+        {field:'roomTypeName',title:'房间类型',width:200},   
+        {field:'roomRemark',title:'房间备注',width:200},
+        {field:'roomStatus',title:'房间状态',width:200},   
+        {field:'image',title:'房间图片',width:200,formatter: function(value,row,index){
+        						if(value)
+        						{
+        							var v=value;
+        							return  '<img id="huang"  alt="无" src="images/'+v+'" style="height: 30px;width: 70px" onclick="downloads(\''+v+'\')">';
+        						}
+        					  }
+        					}
+    ]]
+}); 
+
+function downloads(img){
+	var simg =  "images/"+ img; 
+	 $("#simg").attr("style","height: 260px;width: 280px");
+        $("#simg").attr("src",simg); 
+        $('#imgs').dialog({  
+            title: '预览',  
+            width: 300,  
+            height:300,  
+            border:false,
+            resizable:true,  
+            closed: false,  
+            cache: false,  
+            modal: true  
+        });  
+       
+        
+}
+var addUser;
+	function addroom(){
+	 addUser = $('<div>').dialog({
+				//closed: false,   //改为true  默认就是看不到窗口
+				modal:true,        //对话框的底层是不可以进行操作的。	
+				href:'jsp/back/AddRoom.html',				
+				title: "添加信息",
+				width: 400,
+				top:170,
+				buttons: [{
+					text: '确定',
+					iconCls: 'icon-ok',
+					handler: addsaveUser
+				}, {
+					text: '取消',
+					iconCls: 'icon-cancel',
+					handler: function () {
+						addUser.dialog('close');                    
+					}
+				}]
+		});
+	}
+	var userEdit;
+	var roomtypename;
+	var roomId;
+	function editroom(){
+	var rows = $('#dg').datagrid('getChecked');
+	//alert(item.productid);return;
+	if(rows.length == 1){
+		
+		var rowIndex = $('#dg').datagrid('getRowIndex', rows[0]);
+		 userEdit = $('<div>').dialog({
+			href:'jsp/back/EditRoom.html',
+			closed: false,
+			width: 400,
+			top:170,
+			modal:true,
+
+			title: "修改用户",
+			buttons: [{
+				text: '确定',
+				iconCls: 'icon-ok',
+				handler: editsaveUser
+			}, {
+				text: '取消',
+				iconCls: 'icon-cancel',
+				handler: function () {
+					userEdit.dialog('close');                    
+				}
+			}],
+			onClose : function() {
+					$(this).dialog('destroy');
+			},
+			onLoad : function() {
+				$('#room-form-Edit').form('load',{
+					roomId:rows[0].roomId,
+					roomPrice: rows[0].roomPrice,
+					roomRemark:rows[0].roomRemark,
+					roomStatus : rows[0].roomStatus,
+					imagename:rows[0].image,
+					roomTypeName:rows[0].roomTypeName,
+				});
+				roomtypename=rows[0].roomTypeName;
+				roomId=rows[0].roomId;
+			}
+		});
+	}else{
+		$.messager.alert('提示', '请勾选一条要编辑的数据','info');	
+	}
+
+}	
+
+	function addsaveUser(){
+		var roomId=$('#roomId').val();
+		var roomPrice=$('#roomPrice').val();
+		var roomStatus=$('#roomStatus').val();
+		var roomTypeName=$('#roomTypeName').combo('getText');
+		var roomRemark=$('#roomRemark').val();
+		var image=$('#image').val();
+		$.ajax({
+				url:'addsaveRoom',
+				type:"post",
+				dataType:"json",
+				data:{
+					roomId:roomId,
+					roomPrice:roomPrice,
+					roomStatus:roomStatus,
+					roomRemark:roomRemark,
+					roomTypeName:roomTypeName,
+					fileimage:image
+				},
+				success:function(data){
+				 	if(data == 1){
+						addUser.dialog('close');  
+						$.messager.show({
+							title : '提示',
+							msg : '更新成功'
+						});
+						$('#dg').datagrid({
+								url:'queryRoom',
+							});
+					}else{
+						$.messager.show({
+							title : '提示',
+							msg : '更新失败，请联系管理员 ------'
+						});
+					}
+				},
+				error:function(){
+						$.messager.show({
+							title : '提示',
+							msg : '系统错误'
+						});
+				}
+			});
+	}
+	
+	function editsaveUser(){
+	$.ajax({
+				url:'deleteRooms',
+				type:"post",
+				dataType:"json",
+				data:{
+					roomTypeName:roomtypename,
+					roomId:roomId,
+				},
+			}); 
+		$('#room-form-Edit').form('submit',{
+			url: 'saveRoom',
+			onSubmit: function(){
+				return $(this).form('validate');
+			},
+			success: function(result){
+				 var result = eval('('+result+')'); 
+				if (result==1){
+
+					userEdit.dialog("close");		// close the dialog
+					$.messager.show({
+							   title:'提示',
+							   msg:'用户信息修改成功'
+						});	// reload the user data
+					$('#dg').datagrid('reload');
+				} else {
+					$.messager.show({
+						title: 'Error',
+						msg: result.msg
+					});
+				}
+			}
+		});
+	}
+	function deleteroom()
+	{
+		var row = $('#dg').datagrid('getChecked');
+		if (row[0]){
+			$.messager.confirm('Confirm','Are you sure you want to remove this user?',function(r){
+				if (r){
+					$.post('deleteRoom',{roomid:row[0].roomId},function(result){
+						if (result==1){
+						$.messager.show({
+							   title:'提示',
+							   msg:'用户信息删除成功'
+						});
+							$('#dg').datagrid('reload');	// reload the user data
+						} else {
+							$.messager.show({	// show error message
+								title: 'Error',
+								msg: result.msg
+							});
+						}
+					},'json');
+				}
+			});
+		}
+		else
+		{
+			$.messager.alert('提示', '请勾选一条要删除的数据','info');	
+		}
+	}
+	
+function doSearch(){
+		var id=$('#itemid').combo('getText');
+		var price=$('#itemprice').combo('getText');
+		var status=$('#itemstatus').combo('getText');	 
+ 		if(!id)
+		{
+			id=0;
+		}
+		if(!price)
+		{
+			price=0;
+		}
+		if(!status)
+		{
+			status=0;
+		} 
+		if(id||price||status){
+			$('#dg').datagrid({
+					url:'searchRoomByid',
+					queryParams:{
+						roomId:id,
+ 						roomPrice:price,
+				        roomStatus:status  
+					}	
+			});
+		}
+		else
+		{
+			$('#dg').datagrid({
+					url:'queryRoom'
+			});
+		}
+		
+	}
+</script>

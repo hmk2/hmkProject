@@ -1,0 +1,51 @@
+<form id="room-form-Add" method="post" style="padding:10px;" enctype="multipart/form-data">
+        <table>
+            <tr>
+                <td width="100" align="right">房间ID:</td>
+                <td><input type="text" id="roomId" name="roomId" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td align="right">房间价格:</td>
+                <td><input type="text" id="roomPrice" name="roomPrice" class="wu-text" /></td>
+            </tr>
+            <tr>
+             <td width="100" align="right">房间类型:</td>
+             <td><input id="roomTypeName" class="easyui-combobox" data-options="url:'serachRoomTypeByName'" name="roomTypeName"/></td>
+         	</tr>
+            <tr>
+                <td align="right">房间备注:</td>
+                <td><input type="text" id="roomRemark" name="roomRemark" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td valign="top" align="right">房间状态:</td>
+                <td><input type="text" id="roomStatus" name="roomStatus" class="wu-text" /></td>
+            </tr>
+            <tr>
+                <td valign="top" align="right">图片名称:</td>
+                <td><input type="text" id="imagename" name="imagename" class="wu-text" onclick="down();"/><input type="button" value="预览" onclick="down();"/> </td>
+            </tr>
+            <tr>
+                <td valign="top" align="right">房间图片:</td>
+                <td> <img id="image" ></td>
+            </tr>
+            <tr>
+                <td valign="top" align="right">房间图片:</td>
+                <td><input type="file" id="images" name="fileimage" class="wu-text" onchange="updown(this);" /></td>
+            </tr>
+        </table>
+    </form>
+<script type="text/javascript">
+			function down()
+			{		$("#image").attr("style","height: 80px;width: 100px");
+					$('#image').attr("src","images/"+$('#imagename').val());
+			}
+			function updown(value)
+			{
+				/* alert(value); */
+				/* var name= value.getName();
+				alert(name);
+				$('#image').attr("src","images/"+value);
+				$('#imagename').val(value); */
+			}
+			
+</script>

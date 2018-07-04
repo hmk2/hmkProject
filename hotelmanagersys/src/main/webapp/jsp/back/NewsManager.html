@@ -1,0 +1,220 @@
+<div style="margin-bottom:5px" id="Newstb">
+	<div >
+		<a href="#" class="easyui-linkbutton" onclick="addNews()" iconCls="icon-add" plain="true">添加酒店新闻</a>
+		<a href="#" class="easyui-linkbutton" onclick="editNews()" iconCls="icon-edit" plain="true">编辑酒店新闻</a>
+		<a href="#" class="easyui-linkbutton" onclick="" iconCls="icon-save" plain="true">保存酒店新闻</a>
+		<a href="#" class="easyui-linkbutton" onclick="deleteNews()" iconCls="icon-remove" plain="true">删除酒店新闻</a>
+	</div>
+	<div >
+		<span>新闻ID:</span>
+		<select id="itemnewsid"  style="width: 80px" >
+		</select>
+		<span>新闻作者:</span>
+		<select id="itemauthor"  style="width: 80px" >
+		</select>
+		<a href="#" iconCls="icon-search" class="easyui-linkbutton" plain="true" onclick="doNewsSearch()">Search</a>
+	</div>
+</div>
+<table id="News" toolbar="#Newstb" fit="true" title="新闻管理"></table>
+<script type="text/javascript">
+$.post('serachNewsid',function(result){ 
+			 for(var i=0;i<result.length;i++)
+			{
+				 $("#itemnewsid").append("<option>"+result[i]+"</option>"); 
+				
+			} 
+			$("#itemnewsid").combobox({panelHeight:120});
+					},'json');
+
+	$.post('serachNewsauthor',function(result){ 
+			 for(var i=0;i<result.length;i++)
+			{
+				$("#itemauthor").append("<option>"+result[i]+"</option>");
+			} 
+			$("#itemauthor").combobox({panelHeight:120});
+					},'json');
+	$('#News').datagrid({
+		url:'queryNews',
+		rownumbers:true,  
+		pagination:true,
+		striped:true,
+		singleSelect:true,
+		pageSize:10, 
+		selectOnCheck:false,
+		fit:true,
+		columns:[[ 
+    	{ checkbox:true},   
+        {field:'newsId',title:'新闻ID',width:100},    
+        {field:'newsAuthor',title:'新闻作者',width:150},
+        {field:'newsTime',title:'新闻发布时间',width:200},    
+        {field:'newsContent',title:'新闻内容',width:300},
+        {field:'newsRemark',title:'新闻备注',width:200},
+        {field:'newsStatus',title:'新闻状态',width:150} ]]	
+	});
+	var addnews;
+	function addNews(){
+	 addnews = $('<div>').dialog({
+				//closed: false,   //改为true  默认就是看不到窗口
+				modal:true,        //对话框的底层是不可以进行操作的。	
+				href:'jsp/back/newsAdd.html',				
+				title: "添加信息",
+				width: 400,
+				top:170,
+				buttons: [{
+					text: '确定',
+					iconCls: 'icon-ok',
+					handler: addsaveNews
+				}, {
+					text: '取消',
+					iconCls: 'icon-cancel',
+					handler: function () {
+						addnews.dialog('close');                    
+					}
+				}]
+		});
+	}
+	function addsaveNews(){
+		var newsAuthor=$('#newsAuthor').val();
+		var newsRemark=$('#newsRemark').val();
+		var newsContent=$('#newsContent').val();
+		$.ajax({
+				url:'addsaveNews',
+				type:"post",
+				dataType:"json",
+				data:{
+					newsAuthor:newsAuthor,
+					newsRemark:newsRemark,
+					newsContent:newsContent,
+				},
+				success:function(data){
+				 	if(data.status=="success"){
+				 		
+						addnews.dialog('close'); 
+						$.messager.show({
+							title : '提示',
+							msg : '更新成功'
+						});
+						$('#News').datagrid({
+								url:'queryNews',
+							});
+					}else{
+						$.messager.show({
+							title : '提示',
+							msg : '更新失败，请联系管理员 ------'
+						});
+					}
+				},
+				error:function(){
+						$.messager.show({
+							title : '提示',
+							msg : '系统错误'
+						});
+				}
+			});
+	}
+	var newsEdit;
+	function editNews(){
+	var rows = $('#News').datagrid('getChecked');
+	if(rows.length == 1){
+		
+		 newsEdit = $('<div>').dialog({
+			href:'jsp/back/newsEdit.html',
+			closed: false,
+			width: 400,
+			top:170,
+			modal:true,
+
+			title: "修改用户",
+			buttons: [{
+				text: '确定',
+				iconCls: 'icon-ok',
+				handler: editsaveNews
+			}, {
+				text: '取消',
+				iconCls: 'icon-cancel',
+				handler: function () {
+					newsEdit.dialog('close');                    
+				}
+			}],
+			onClose : function() {
+					$(this).dialog('destroy');
+			},
+			onLoad : function() {
+				$('#news-form-Edit').form('load',{
+					newsId:rows[0].newsId,
+					newsAuthor: rows[0].newsAuthor,
+					newsTime:rows[0].newsTime,
+					newsStatus:rows[0].newsStatus,
+					newsContent:rows[0].newsContent,
+					newsRemark : rows[0].newsRemark
+				});
+			}
+		});
+	}else{
+		$.messager.alert('提示', '请勾选一条要编辑的数据','info');	
+	}
+}
+function editsaveNews(){
+		$('#news-form-Edit').form('submit',{
+			url: 'editSaveNews',
+			onSubmit: function(){
+				return $(this).form('validate');
+			},
+			success: function(result){
+				var result = eval('('+result+')'); 
+				if (result.status=="success"){
+					newsEdit.dialog("close");
+					$.messager.show({
+							   title:'提示',
+							   msg:'新闻信息修改成功'
+						});	
+					$('#News').datagrid('reload');
+				} else {
+					$.messager.show({
+						title: 'Error',
+						msg: result.msg
+					});
+				}
+			}
+		});
+	}
+	function deleteNews()
+	{
+		var row = $('#News').datagrid('getChecked');
+		if (row[0]){
+			$.messager.confirm('Confirm','Are you sure you want to remove this News?',function(r){
+				if (r){
+					$.post('deleteNews',{newsId:row[0].newsId},function(result){
+						if (result.status=="success"){
+						$.messager.show({
+							   title:'提示',
+							   msg:'新闻信息删除成功'
+						});
+							$('#News').datagrid('reload');	// reload the user data
+						} else {
+							$.messager.show({	// show error message
+								title: 'Error',
+								msg: result.msg
+							});
+						}
+					},'json');
+				}
+			});
+		}
+		else
+		{
+			$.messager.alert('提示', '请勾选一条要删除的数据','info');	
+		}
+	}
+	function doNewsSearch(){
+		var id=$('#itemnewsid').combo('getText');
+		var author=$('#itemauthor').combo('getText');
+			$('#News').datagrid({
+					url:'searchNews',
+					queryParams:{
+						id:id,
+ 						 author:author
+					}	
+			});	
+	}	
+</script>

@@ -1,0 +1,213 @@
+<div style="margin-bottom:5px" id="Depttb">
+	<div >
+		<a href="#" class="easyui-linkbutton" onclick="addDept()" iconCls="icon-add" plain="true">添加部门信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="editDept()" iconCls="icon-edit" plain="true">编辑部门信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="" iconCls="icon-save" plain="true">保存部门信息</a>
+		<a href="#" class="easyui-linkbutton" onclick="deleteDept()" iconCls="icon-remove" plain="true">删除部门信息</a>
+	</div>
+	<div >
+		<span>部门ID:</span>
+		<select id="itemdeptid" class="easyui-combobox"   style="width: 80px" >
+		</select>
+		<span>部门姓名:</span>
+		<select id="itemdeptname"  style="width: 80px" >
+		</select>
+		<a href="#" iconCls="icon-search" class="easyui-linkbutton" plain="true" onclick="doDeptSearch()">Search</a>
+	</div>
+</div>
+<table id="Dept" toolbar="#Depttb" fit="true" title="部门管理"></table>
+<script type="text/javascript">
+	$.post('serachDeptid',function(result){ 
+		$("#itemdeptid").combobox('loadData', result);
+		 $("#itemdeptid").combobox('setValue', '--请选择--'); 
+		$("#itemdeptid").combobox({panelHeight:120});
+		},'json');
+	 $.post('serachDeptName',function(result){ 
+			 for(var i=0;i<result.length;i++)
+			{
+				$("#itemdeptname").append("<option>"+result[i]+"</option>");
+			} 
+			$("#itemdeptname").combobox({panelHeight:120});
+					},'json'); 
+	$('#Dept').datagrid({
+		url:'queryDept',
+		rownumbers:true,  
+		pagination:true,
+		striped:true,
+		singleSelect:true,
+		fitColumns:true,
+		pageSize:10, 
+		selectOnCheck:false,
+		fit:true,
+		columns:[[ 
+    	{ checkbox:true},   
+        {field:'deptId',title:'部门ID',width:200},    
+        {field:'deptName',title:'部门名字',width:200},
+        {field:'deptRemark',title:'部门备注',width:200},    
+        {field:'deptStatus',title:'部门状态',width:200}  ]]	
+	});
+	
+	var adddept;
+	function addDept(){
+	 adddept = $('<div>').dialog({
+				//closed: false,   //改为true  默认就是看不到窗口
+				modal:true,        //对话框的底层是不可以进行操作的。	
+				href:'jsp/back/deptAdd.html',				
+				title: "添加信息",
+				width: 280,
+				top:170,
+				buttons: [{
+					text: '确定',
+					iconCls: 'icon-ok',
+					handler: addSaveDept
+				}, {
+					text: '取消',
+					iconCls: 'icon-cancel',
+					handler: function () {
+						adddept.dialog('close');                    
+					}
+				}]
+		});
+	}
+	function addSaveDept(){
+		var deptName=$('#deptName').val();
+		var deptRemark=$('#deptRemark').val();
+		$.ajax({
+				url:'addsaveDept',
+				type:"post",
+				dataType:"json",
+				data:{
+					deptName:deptName,
+					deptRemark:deptRemark,
+				},
+				success:function(data){
+				 	if(data.status=="success"){
+						adddept.dialog('close');  
+						$.messager.show({
+							title : '提示',
+							msg : '更新成功'
+						});
+						$('#Dept').datagrid({
+								url:'queryDept',
+							});
+					}else{
+						$.messager.show({
+							title : '提示',
+							msg : '更新失败，请联系管理员 ------'
+						});
+					}
+				},
+				error:function(){
+						$.messager.show({
+							title : '提示',
+							msg : '系统错误'
+						});
+				}
+			});
+	}
+	
+	var deptEdit;
+	function editDept(){
+	var rows = $('#Dept').datagrid('getChecked');
+	if(rows.length == 1){
+		 deptEdit = $('<div>').dialog({
+			href:'jsp/back/deptEdit.html',
+			closed: false,
+			width: 400,
+			top:170,
+			modal:true,
+
+			title: "修改用户",
+			buttons: [{
+				text: '确定',
+				iconCls: 'icon-ok',
+				handler: editsaveDept
+			}, {
+				text: '取消',
+				iconCls: 'icon-cancel',
+				handler: function () {
+					deptEdit.dialog('close');                    
+				}
+			}],
+			onClose : function() {
+					$(this).dialog('destroy');
+			},
+			onLoad : function() {
+				$('#dept-form-Edit').form('load',{
+					deptId:rows[0].deptId,
+					deptName: rows[0].deptName,
+					deptStatus:rows[0].deptStatus,
+					deptRemark : rows[0].deptRemark
+				});
+			}
+		});
+	}else{
+		$.messager.alert('提示', '请勾选一条要编辑的数据','info');	
+	}
+}
+function editsaveDept(){
+		$('#dept-form-Edit').form('submit',{
+			url: 'editSaveDept',
+			onSubmit: function(){
+				return $(this).form('validate');
+			},
+			success: function(result){
+				var result = eval('('+result+')'); 
+				if (result.status=="success"){
+					deptEdit.dialog("close");
+					$.messager.show({
+							   title:'提示',
+							   msg:'部门信息修改成功'
+						});	
+					$('#Dept').datagrid('reload');
+				} else {
+					$.messager.show({
+						title: 'Error',
+						msg: result.msg
+					});
+				}
+			}
+		});
+	}	
+	function deleteDept()
+	{
+		var row = $('#Dept').datagrid('getChecked');
+		if (row[0]){
+			$.messager.confirm('Confirm','Are you sure you want to remove this Dept?',function(r){
+				if (r){
+					$.post('deleteDept',{deptid:row[0].deptId},function(result){
+						if (result.status=="success"){
+						$.messager.show({
+							   title:'提示',
+							   msg:'部门信息删除成功'
+						});
+							$('#Dept').datagrid('reload');	// reload the user data
+						} else {
+							$.messager.show({	// show error message
+								title: 'Error',
+								msg: result.msg
+							});
+						}
+					},'json');
+				}
+			});
+		}
+		else
+		{
+			$.messager.alert('提示', '请勾选一条要删除的数据','info');	
+		}
+	}
+	function doDeptSearch(){
+	
+	
+		var id=$('#itemdeptid').combo('getText');
+		var name=$('#itemdeptname').combo('getText');
+			$('#Dept').datagrid({
+					url:'searchDept',
+					queryParams:{
+						id:id,
+ 						name:name
+					}	
+			});	
+	}	
+</script>
