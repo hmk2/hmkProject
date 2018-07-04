@@ -1,0 +1,70 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sys.dao.AuthorizationDao">
+	<insert id="addAuth" parameterType="Authorization">
+		insert into t_authorization
+		values(#{auId},#{auName}，#{auUrl}，#{status})
+	</insert>
+	<update id="editAuth" parameterType="Authorization">
+		update 
+			t_authorization
+		set
+			au_name=#{auName},au_url=#{auUrl},status=#{status}
+		where
+			au_id=#{auId}
+	</update>
+	<update id="deleteAuth" parameterType="int">
+		update 
+			t_authorization
+		set
+			status=1
+		where
+			au_id=#{auId}
+	</update>
+	<update id="deleteBatchAuth" parameterType="int">
+		update 
+			t_authorization
+		set
+			status=1
+		where
+			au_id in(
+				<foreach collection="list" item="item" separator=",">
+					#{item}
+				</foreach>
+			)
+	</update>
+	<select id="queryAllau" resultType="Authorization">
+		select 
+			au_id,au_name,au_url,status
+		from
+			t_authorization
+	</select>
+	<select id="findAuByid" resultType="Authorization">
+		select 
+			au_id,au_name,au_url,status
+		from
+			t_authorization
+		where
+			au_id=#{auId}
+	</select>
+	<select id="checkAu" resultType="int">
+		select count(*) 
+		from t_account tac
+		inner join t_account_role tar
+ 		on tac.account=tar.acc_id
+ 		inner join t_role_authorization tra
+		on tar.role_id=tra.role_id
+		where account=#{account}
+		and tra.au_id in
+		(select au_id from t_authorization where au_url=#{url})
+	</select>
+	<select id="findAuByUrl"  parameterType="String" resultType="Authorization">
+		select 
+			au_id,au_name,au_url,status
+		from
+			t_authorization
+		where
+			au_url=#{url}
+	</select>
+</mapper>

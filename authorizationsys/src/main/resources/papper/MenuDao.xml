@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper	namespace="com.sys.dao.MenuDao">
+	<select id="queryallMen" resultType="Menu">
+		select
+			menu_id,menu_name,menu_url,men_target,parent_id,status
+		from
+			t_menu
+	</select>
+	<select id="queryParentmen" parameterType="int" resultType="Menu">
+		select
+			menu_id,menu_name,menu_url,men_target,parent_id,status
+		from
+			t_menu
+		where
+			parent_id=0 and menu_id != #{id}
+	</select>
+	<select id="queryAllParentmen" resultType="Menu">
+		select
+			menu_id,menu_name,menu_url,men_target,parent_id,status
+		from
+			t_menu
+		where
+			parent_id=0 
+	</select>
+	<select id="queryallMenByAccount" parameterType="String" resultType="Menu">
+		select
+			tm.menu_id,tm.menu_name,tm.menu_url,tm.men_target,tm.parent_id,tm.status
+		 from t_account ta
+ 				inner join t_account_role tar
+ 					on ta.account=tar.acc_id
+ 				inner join t_role_menu trm
+ 					on tar.role_id=trm.role_id and trm.status=0
+ 				inner join t_menu tm
+					on trm.menu_id=tm.menu_id
+ 				where 
+ 					tm.status=0 and ta.account=#{acc}
+ 				order by tm.menu_id asc
+	</select>
+	<select id="queryMenuByid" parameterType="int" resultType="Menu">
+		select 
+			menu_id,menu_name,menu_url,men_target,parent_id,status
+		from 
+			t_menu
+		where
+			menu_id=#{id}
+	</select>
+	<update id="editMenu" parameterType="Menu">
+		update
+			t_menu
+		set
+			menu_name=#{menuName},menu_url=#{menuUrl},men_target=#{menTarget},parent_id=#{parentId},status=#{status}
+		where
+			menu_id=#{menuId}
+	</update>
+	<update id="deleteMenu" parameterType="int">
+		update
+			t_menu
+		set
+			status=1
+		where
+			menu_id=#{id}
+	</update>
+	<update id="deleteBatchMen" parameterType="List">
+		update
+			t_menu
+		set
+			status=1
+		where
+			menu_id in(
+				<foreach collection="list" item="item" separator=",">
+					#{item}
+				</foreach>
+			)
+	</update>
+	<insert id="addMen" parameterType="Menu" >
+		insert into t_menu
+		values(#{menuId},#{menuName},#{menuUrl},#{menTarget},#{parentId},#{status})
+	</insert>
+</mapper>

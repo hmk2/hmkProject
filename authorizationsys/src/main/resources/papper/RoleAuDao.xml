@@ -1,0 +1,19 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.sys.dao.RoleAuDao">
+	<insert id="addrad" parameterType="int">
+		insert into t_role_authorization values(#{raId},#{roleId},#{auId},0)
+	</insert>
+	<update id="deleterad">
+		update t_role_authorization
+		set
+			status=1
+		where
+			ROLE_ID=#{id}
+	</update>
+	<select id="queryMaxAu" resultType="int">
+		select max(ra_id)from t_role_authorization
+	</select>
+</mapper>

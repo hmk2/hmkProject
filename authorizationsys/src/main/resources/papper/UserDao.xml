@@ -1,0 +1,60 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.sys.dao.UserDao">
+
+	<insert id="addUser" parameterType="User">
+		insert into  t_user
+		values(#{userId},#{userName},#{userAge},#{userSex},
+			#{userMobile},#{userEmail})
+	</insert>
+	<select id="queryAlluer" resultType="User">
+		select
+			<if test="roleName==&quot;普通用户&quot;">
+		tu.*from
+				t_account ta inner join t_user_account tua on ta.account=tua.acc_id and tua.status=0
+				inner join t_user tu on tu.user_id=tua.user_id
+		where
+			ta.account=#{acc}	
+			</if>
+			<if test="roleName==&quot;系统管理员&quot;">
+				user_id,user_name,user_age,user_sex,user_mobile,user_email
+			from t_user
+			</if>
+	</select>
+	<update id="editUser" parameterType="User">
+		update
+			 t_user 
+		set
+			user_name=#{userName},user_age=#{userAge},user_sex=#{userSex},
+			user_mobile=#{userMobile},user_email=#{userEmail}
+		where
+			user_id=#{userId}
+	</update>
+	
+	<select id="finduserByid" parameterType="int" resultType="User">
+		select 
+			user_id,user_name,user_age,user_sex,user_mobile,user_email
+		from
+			t_user
+		where
+			user_id=#{id}
+	</select>
+	<delete id="deleteUser" parameterType="int">
+		delete from
+			t_user
+		where
+			user_id=#{id}
+	</delete>
+	<delete id="deleteBatchUser" parameterType="int">
+		delete from
+			t_user
+		where
+			user_id in(
+				<foreach collection="list" item="item" separator=",">
+					#{item}
+				</foreach>
+			)
+	</delete>
+</mapper>

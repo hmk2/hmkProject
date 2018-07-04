@@ -1,0 +1,19 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.sys.dao.RoleMenDao">
+	<insert id="addrm" >
+		insert into t_role_menu values(#{rmId},#{roleId},#{menuId},0)
+	</insert>
+	<update id="deleterm">
+		update t_role_menu
+		set
+			status=1
+		where
+			role_id=#{id}
+	</update>
+	<select id="queryMaxId" resultType="int">
+		select max(rm_id)from T_ROLE_MENU
+	</select>
+</mapper>

@@ -1,0 +1,71 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.sys.dao.RoleDao">
+	<select id="queryRoleByAccount" parameterType="String" resultType="Role">
+		select 
+			tr.role_id,tr.role_name,tr.parent_id,tr.status
+		from
+			t_account ta inner join t_account_role tar on ta.account=tar.acc_id and tar.status=0
+			inner join t_role tr on tar.role_id=tr.role_id
+		where
+			ta.account=#{acc}
+	</select>
+	<insert id="addRole" parameterType="Role">
+		insert into 
+					t_role
+		values(#{roleId},#{roleName},#{parentId},#{status})
+	</insert>
+	<update id="editRole" parameterType="Role">
+		update 
+			t_role
+		set
+			role_name=#{roleName},parent_id=#{parentId},status=#{status}
+		where
+			role_id=#{roleId}
+	</update>
+	<select id="findRoleByid" parameterType="int" resultType="Role">
+		select
+			role_id,role_name,parent_id,status
+		from
+			t_role
+		where
+			role_id=#{roleId}
+	</select>
+	<select id="queryRole" resultType="Role">
+		select
+			role_id,role_name,parent_id,status
+		from
+			t_role
+	</select>
+	<update id="deleteRole" parameterType="int">
+		update 
+			t_role
+		set 
+			status=1
+		where
+			role_id=#{roleId}
+	</update>
+	
+	<update id="deletebatchRole" parameterType="List">
+		update 
+			t_role
+		set
+			status=1
+		where
+			role_id in(
+			<foreach collection="list" item="item" separator=",">
+				#{item}
+			</foreach>
+		)
+	</update>
+	
+	<insert id="addbatchRole" parameterType="Role">
+		insert into 
+					t_role
+		values
+		<foreach collection="list" item="item" separator=","></foreach>
+		(#{item.roleId},#{item.roleName},#{item.parentId},#{item.status})
+	</insert>
+</mapper>

@@ -1,0 +1,16 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.sys.dao.UserAccountDao">
+	<insert id="addua" >
+		insert into t_user_account values(#{tuaId},#{userId},#{accId},0)
+	</insert>
+	<update id="deleteua">
+		update t_user_account
+		set
+			status=1
+		where
+			tua_id=#{id}
+	</update>
+</mapper>

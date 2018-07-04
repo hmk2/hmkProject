@@ -1,0 +1,60 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.sys.dao.AccountDao">
+	<select id="findAccountById" parameterType="String" resultType="Account">
+		select
+			account,password,status
+		from
+			t_account
+		where
+			account=#{accno} 
+	</select>
+	
+	<select	id="queryAccount" resultType="Account">
+		select
+			account,password,status
+		from
+			t_account
+		<if test="roleName==&quot;普通用户&quot;">	
+		where
+			account=#{account} and status=0
+		</if>
+	</select>
+	
+	<update	id="updateAccount" parameterType="String">
+		update 
+			t_account
+		set 
+			status=1
+		where
+			account=#{accno}
+	</update>
+	
+	<update	id="editAccount" parameterType="Account">
+		update 
+			t_account
+		set 
+			password=#{password},status=#{status}
+		where
+			account=#{account}
+	</update>
+	<insert	id="addAccount" parameterType="Account">
+		insert into 
+			t_account
+		values( #{account},#{password},#{status})
+	</insert>
+	<update id="deletebatch" parameterType="String">
+		update 
+			t_account
+		set 
+			status=1
+		where
+			account in(
+			<foreach collection="list" item="item" separator=",">
+				#{item}
+			</foreach>
+			)
+	</update>
+</mapper>
